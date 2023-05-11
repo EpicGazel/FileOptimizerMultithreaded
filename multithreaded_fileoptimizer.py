@@ -11,6 +11,7 @@ def process_file(file):
 
 
 def main():
+    num_threads = int(input("Input number of threads to use (usually #cores * 2): "))
     # Directory
     tkinter.Tk().withdraw()
     optimize_path = Path(tkinter.filedialog.askdirectory())
@@ -28,7 +29,7 @@ def main():
     print(f'Size reduced from {size_before/1000000:.2f}MB')
 
     # Multithreading
-    with Pool() as pool:
+    with Pool(num_threads) as pool:
         for _ in tqdm.tqdm(pool.imap_unordered(process_file, files), total=len(files)):
             pass
 
