@@ -4,7 +4,6 @@ import tkinter
 from tkinter import filedialog
 from multiprocessing import Pool
 import tqdm
-from time import sleep
 
 
 def process_file(file):
@@ -27,7 +26,6 @@ def main():
 
     print("Path (Recursive): ", optimize_path)
     print(f'Size reduced from {size_before/1000000:.2f}MB')
-    sleep(1)
 
     # Multithreading
     with Pool() as pool:
