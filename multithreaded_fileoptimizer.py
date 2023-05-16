@@ -6,6 +6,7 @@ from multiprocessing import Pool
 import tqdm
 import heapq
 import os.path
+from time import time
 
 
 # https://stackoverflow.com/questions/61648065/split-list-into-n-sublists-with-approximately-equal-sums
@@ -25,16 +26,20 @@ def process_file(file):
 
 
 def process_files_batch(files):
-    subprocess.run(["FileOptimizer64.exe"] + files + ["/NOWINDOW"])
+    command = ["Start-Process -Wait -FilePath .\FileOptimizer64.exe -ArgumentList \'"] + files + ["/NOWINDOW\'"]
+    #print("Command: ", subprocess.list2cmdline(command))
+    subprocess.run(command, shell=True, executable=r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
 
 
 def main():
     num_threads = int(input("Input number of threads to use (usually #cores * 2): "))
-    # batch_size = int(input("Input number of files per process (to avoid overhead): "))
-    batch_size = 1
+    #num_threads = 12
+    batch_size = int(input("Input number of files per process (to avoid overhead): "))
+    #batch_size = 4
     # Directory
     tkinter.Tk().withdraw()
     optimize_path = Path(tkinter.filedialog.askdirectory())
+    #optimize_path = Path(r'C:\Users\zanes\Desktop\lezgo')
     all_files = list(Path(optimize_path).rglob("*.*"))
 
     # Ignore Symlinks
@@ -67,12 +72,20 @@ def main():
     num_files_skip = int(input("How many of the first files would you like to skip? (Default 0): "))
     del files[:num_files_skip]
 
-
     print("Path (Recursive): ", optimize_path)
     print(f'Size reduced from {size_before / 1000000:.2f}MB')
 
-    print(files)
+    #print(files)
+
+    #files_divided = sublist_creator(files, len(files) // batch_size)
+    #files_divided = [files[:4], files[4:8], files[8:12], files[12:16]]
+    #process_files_batch(files_divided[1])
+    # for batch in files_divided:
+    #     print(batch)
+    #     process_files_batch(batch)
+
     # Multithreading
+    start_time = time()
     if batch_size == 1:
         with Pool(num_threads) as pool:
             try:
@@ -81,19 +94,24 @@ def main():
             finally:
                 pool.terminate()
     else:  # Batch size greater than 1
-        files_divided = sublist_creator(files, batch_size)
+        files_divided = sublist_creator(files, len(files) // batch_size)
         with Pool(num_threads) as pool:
             try:
                 for _ in tqdm.tqdm(pool.imap_unordered(process_files_batch, files_divided), total=len(files_divided)):
                     pass
             finally:
+                #print("finally")
                 pool.terminate()
+                pool.join()
 
+            #print("end of pool")
 
     # Final stats
+    end_time = time()
     size_after = sum(f.stat().st_size for f in optimize_path.rglob('*.*') if f.is_file())
     print(f'to {size_after / 1000000:.2f}MB,'
           f'a {(1 - size_after / size_before) * 100:.2f}% reduction.')
+    print(f'The processing took {end_time - start_time} seconds.')
 
 
 if __name__ == "__main__":
