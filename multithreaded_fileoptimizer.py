@@ -111,7 +111,7 @@ def main():
     size_after = sum(f.stat().st_size for f in optimize_path.rglob('*.*') if f.is_file())
     print(f'to {size_after / 1000000:.2f}MB,'
           f'a {(1 - size_after / size_before) * 100:.2f}% reduction.')
-    print(f'The processing took {end_time - start_time} seconds.')
+    print(f'The processing took {end_time - start_time:.2f} seconds.')
 
 
 if __name__ == "__main__":
