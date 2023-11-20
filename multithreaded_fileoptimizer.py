@@ -26,7 +26,7 @@ def process_file(file):
 
 
 def process_files_batch(files):
-    command = ["Start-Process -Wait -FilePath .\FileOptimizer64.exe -ArgumentList \'"] + files + ["/NOWINDOW\'"]
+    command = ["Start-Process -Wait -FilePath .\\FileOptimizer64.exe -ArgumentList \'"] + files + ["/NOWINDOW\'"]
     #print("Command: ", subprocess.list2cmdline(command))
     subprocess.run(command, shell=True, executable=r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
 
